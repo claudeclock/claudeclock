@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "promos": [
+    {
+      "id": "march-2026-double",
+      "name": "March 2026 Double Usage",
+      "description": "2x usage limits outside peak hours",
+      "multiplier": 2,
+      "startDate": "2026-03-13T00:00:00-07:00",
+      "endDate": "2026-03-28T23:59:00-07:00",
+      "peakHours": {
+        "timezone": "America/Los_Angeles",
+        "weekdaysOnly": true,
+        "start": "05:00",
+        "end": "11:00"
+      },
+      "eligiblePlans": ["free", "pro", "max", "team"],
+      "infoUrl": "https://support.claude.com/en/articles/14063676-claude-march-2026-usage-promotion"
+    }
+  ]
+}

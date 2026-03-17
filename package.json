@@ -1,0 +1,5 @@
+{
+  "name": "claudeclock",
+  "private": true,
+  "workspaces": ["apps/cli", "apps/web"]
+}
