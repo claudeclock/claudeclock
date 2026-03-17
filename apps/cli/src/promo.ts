@@ -106,6 +106,10 @@ function getTimeInTimezone(date: Date, timezone: string): {
 
 /**
  * Convert hours and minutes in a given timezone on a given date to a UTC Date.
+ *
+ * Uses an iterative approach: make a UTC guess, measure how far off it is in
+ * the target timezone (including day differences), then correct. A second pass
+ * handles any remaining DST-boundary edge cases.
  */
 function timezoneTimeToDate(
   year: number,
@@ -115,18 +119,25 @@ function timezoneTimeToDate(
   minutes: number,
   timezone: string,
 ): Date {
-  // Create a rough UTC guess, then adjust using the timezone offset
-  // We use a binary-search-free approach: format a known date to find offset
-  const guess = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
+  // Start with a naive UTC guess: treat the target local time as if it were UTC
+  let guess = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0));
 
-  // Get what time `guess` is in the target timezone
-  const inTz = getTimeInTimezone(guess, timezone);
-  const guessMinutes = inTz.hours * 60 + inTz.minutes;
-  const targetMinutes = hours * 60 + minutes;
-  const diffMinutes = targetMinutes - guessMinutes;
+  // Iteratively correct (two passes is enough to converge)
+  for (let i = 0; i < 2; i++) {
+    const inTz = getTimeInTimezone(guess, timezone);
 
-  // Adjust: if the timezone shows a different time, shift accordingly
-  return new Date(guess.getTime() - diffMinutes * 60_000);
+    // Build a Date representing what the guess looks like in the target timezone,
+    // interpreted as UTC, so we can diff full timestamps (not just hour+minute).
+    const tzAsUtc = Date.UTC(inTz.year, inTz.month - 1, inTz.day, inTz.hours, inTz.minutes, 0);
+    const targetAsUtc = Date.UTC(year, month - 1, day, hours, minutes, 0);
+
+    const diffMs = targetAsUtc - tzAsUtc;
+    if (diffMs === 0) break;
+
+    guess = new Date(guess.getTime() + diffMs);
+  }
+
+  return guess;
 }
 
 /**
