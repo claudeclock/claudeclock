@@ -78,4 +78,33 @@ cp "$UNIVERSAL" "$MACOS_DIR/ClaudeClock"
 cp "$SOURCES_DIR/Info.plist" "$CONTENTS_DIR/Info.plist"
 
 echo "App bundle created: $APP_DIR"
+
+# Create DMG with drag-to-Applications layout
+DMG_DIR="$BUILD_DIR/dmg-staging"
+DMG_PATH="$BUILD_DIR/ClaudeClock.dmg"
+
+rm -rf "$DMG_DIR" "$DMG_PATH"
+mkdir -p "$DMG_DIR"
+
+# Copy app into staging
+cp -R "$APP_DIR" "$DMG_DIR/"
+
+# Create symlink to Applications folder
+ln -s /Applications "$DMG_DIR/Applications"
+
+# Create the DMG
+echo "Creating DMG..."
+hdiutil create \
+    -volname "ClaudeClock" \
+    -srcfolder "$DMG_DIR" \
+    -ov \
+    -format UDZO \
+    "$DMG_PATH" \
+    -quiet
+
+rm -rf "$DMG_DIR"
+
+echo "DMG created: $DMG_PATH"
+echo ""
 echo "Run with: open $APP_DIR"
+echo "Or install from: open $DMG_PATH"
