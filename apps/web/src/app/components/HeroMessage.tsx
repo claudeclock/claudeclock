@@ -25,50 +25,45 @@ const APAC_TIMEZONE_MAP: Record<string, string> = {
   'Asia/Ho_Chi_Minh': 'Vietnam',
 };
 
-// Timezones at UTC+8 or higher that get "most of your working day" message
 const APAC_HIGH_OFFSET_PREFIXES = [
-  'Asia/',
-  'Australia/',
-  'Pacific/Auckland',
-  'Pacific/Chatham',
-  'Pacific/Fiji',
-  'Pacific/Tongatapu',
+  'Asia/', 'Australia/', 'Pacific/Auckland', 'Pacific/Chatham', 'Pacific/Fiji', 'Pacific/Tongatapu',
 ];
 
-function getTimezoneMessage(tz: string): string {
-  // Check specific timezone mapping first
-  const region = APAC_TIMEZONE_MAP[tz];
-  if (region) {
-    return `You're in ${region} \u2014 your working day IS the bonus window.`;
-  }
-
-  // Check if it's a broad APAC timezone
-  const isApac = APAC_HIGH_OFFSET_PREFIXES.some(prefix => tz.startsWith(prefix));
-  if (isApac) {
-    return "You're in the APAC region \u2014 most of your working day falls in the bonus window.";
-  }
-
-  return 'Check your local bonus window times below.';
+function getTimezoneInfo(tz: string): { region: string | null; isApac: boolean } {
+  const region = APAC_TIMEZONE_MAP[tz] ?? null;
+  const isApac = region !== null || APAC_HIGH_OFFSET_PREFIXES.some(p => tz.startsWith(p));
+  return { region, isApac };
 }
 
 export default function HeroMessage() {
-  const [timezone, setTimezone] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [info, setInfo] = useState<{ region: string | null; isApac: boolean; tz: string } | null>(null);
 
   useEffect(() => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    setTimezone(tz);
-    setMessage(getTimezoneMessage(tz));
+    setInfo({ ...getTimezoneInfo(tz), tz });
   }, []);
 
-  if (!timezone || !message) {
-    return <div className="h-16" />;
+  if (!info) return <div className="h-6" />;
+
+  if (info.region) {
+    return (
+      <p className="text-green-400 text-sm font-medium tracking-wide">
+        You&apos;re in {info.region} &mdash; your working day IS the bonus window
+      </p>
+    );
+  }
+
+  if (info.isApac) {
+    return (
+      <p className="text-green-400 text-sm font-medium tracking-wide">
+        You&apos;re in the APAC region &mdash; most of your working day is the bonus window
+      </p>
+    );
   }
 
   return (
-    <div className="text-center">
-      <p className="text-lg md:text-xl text-gray-200">{message}</p>
-      <p className="mt-2 text-sm text-gray-500">Detected timezone: {timezone}</p>
-    </div>
+    <p className="text-gray-400 text-sm">
+      Showing times in your local timezone ({info.tz})
+    </p>
   );
 }

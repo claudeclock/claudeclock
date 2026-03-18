@@ -11,6 +11,10 @@ struct PromoStatus {
     let nextBonusStart: Date?
     let promoEndDate: Date?
     let bonusProgress: Double
+    /// When the next 2x window starts (shown even during bonus for planning)
+    let nextWindowStart: Date?
+    /// When the next 2x window ends (for planning)
+    let nextWindowEnd: Date?
 
     static let inactive = PromoStatus(
         hasActivePromo: false,
@@ -22,6 +26,8 @@ struct PromoStatus {
         windowEnd: nil,
         nextBonusStart: nil,
         promoEndDate: nil,
-        bonusProgress: 0
+        bonusProgress: 0,
+        nextWindowStart: nil,
+        nextWindowEnd: nil
     )
 }

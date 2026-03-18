@@ -9,23 +9,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var currentStatus = PromoStatus.inactive
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        // Create popover with SwiftUI content
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 280, height: 300)
+        popover.contentSize = NSSize(width: 280, height: 340)
         popover.behavior = .transient
-        popover.contentViewController = NSHostingController(rootView: MenuBarDropdown(status: currentStatus))
+        updatePopoverContent()
 
-        // Set up button
         if let button = statusItem.button {
             button.title = "\u{23F8} \u{2014}"
             button.action = #selector(togglePopover)
             button.target = self
         }
 
-        // Update every second
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.updateStatus()
         }
@@ -39,15 +35,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let config = configLoader.config else { return }
         currentStatus = PromoStatusCalculator.getPromoStatus(config: config)
 
-        // Update menu bar title
         if let button = statusItem.button {
             button.title = menuBarTitle
         }
 
-        // Update popover content
-        popover.contentViewController = NSHostingController(
-            rootView: MenuBarDropdown(status: currentStatus)
+        updatePopoverContent()
+    }
+
+    func updatePopoverContent() {
+        let view = MenuBarDropdown(
+            status: currentStatus,
+            lastSyncDate: configLoader.lastSyncDate,
+            syncFailed: configLoader.syncFailed
         )
+        popover.contentViewController = NSHostingController(rootView: view)
     }
 
     var menuBarTitle: String {
@@ -74,7 +75,7 @@ struct ClaudeClockApp {
         let app = NSApplication.shared
         let delegate = AppDelegate()
         app.delegate = delegate
-        app.setActivationPolicy(.accessory) // No dock icon
+        app.setActivationPolicy(.accessory)
         app.run()
     }
 }

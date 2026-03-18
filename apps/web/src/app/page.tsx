@@ -1,85 +1,163 @@
 import Link from 'next/link';
 import HeroMessage from './components/HeroMessage';
+import LiveClock from './components/LiveClock';
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gray-950 text-white">
-      <div className="mx-auto max-w-4xl px-6 py-16 md:py-24">
-        {/* Hero */}
-        <section className="text-center mb-20">
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">
+      <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
+
+        {/* ── Hero ── */}
+        <section className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
             <span className="text-yellow-400">&#9889;</span> Claude Clock
           </h1>
-          <HeroMessage />
-        </section>
-
-        {/* What is this? */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-semibold text-yellow-400 mb-4">What is this?</h2>
-          <div className="space-y-4 text-gray-300 text-lg leading-relaxed">
-            <p>
-              Anthropic is running a promotional period where Claude usage limits are
-              doubled outside of peak hours (weekdays 5 AM &ndash; 11 AM Pacific).
-              That means evenings, nights, and weekends give you 2x the tokens.
-            </p>
-            <p>
-              Claude Clock shows you exactly when the bonus window is active in your
-              timezone so you can plan your usage. Available as a macOS menu bar app,
-              a terminal CLI, and a live web clock.
-            </p>
+          <p className="mt-4 text-lg text-gray-300 max-w-xl mx-auto">
+            See exactly when Claude&apos;s 2&times; bonus window is live in your timezone.
+          </p>
+          <div className="mt-3">
+            <HeroMessage />
           </div>
+
+          {/* Live status inline */}
+          <div className="mt-8">
+            <LiveClock inline />
+          </div>
+
+          {/* CTA cluster */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/clock"
+              className="rounded-lg bg-yellow-400 text-gray-950 font-semibold px-5 py-2.5 text-sm hover:bg-yellow-300 transition-colors"
+            >
+              Open live clock
+            </Link>
+            <a
+              href="/downloads/ClaudeClock.dmg"
+              className="rounded-lg border border-gray-700 text-gray-200 font-semibold px-5 py-2.5 text-sm hover:border-gray-500 hover:text-white transition-colors"
+            >
+              Download Mac app
+            </a>
+            <a
+              href="https://www.npmjs.com/package/claudeclock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-gray-700 text-gray-200 font-semibold px-5 py-2.5 text-sm hover:border-gray-500 hover:text-white transition-colors"
+            >
+              <code className="font-mono text-xs">npm i -g claudeclock</code>
+            </a>
+          </div>
+
+          <p className="mt-4 text-xs text-gray-500">
+            No account needed. Works in your local timezone. No conversion math.
+          </p>
         </section>
 
-        {/* Downloads */}
+        {/* ── What is this ── */}
         <section className="mb-16">
-          <h2 className="text-2xl font-semibold text-yellow-400 mb-6">Download</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* macOS Menu Bar */}
-            <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-              <h3 className="text-xl font-semibold mb-2">macOS Menu Bar App</h3>
-              <p className="text-gray-400 mb-4">
-                Lives in your menu bar. Glanceable status at all times.
-              </p>
-              <a
-                href="/downloads/ClaudeClock.dmg"
-                className="inline-block rounded-lg bg-yellow-400 text-gray-950 font-semibold px-6 py-3 hover:bg-yellow-300 transition-colors"
-              >
-                Download .dmg
-              </a>
-            </div>
+          <p className="text-gray-400 text-center max-w-lg mx-auto leading-relaxed">
+            Anthropic is temporarily doubling Claude usage limits outside peak
+            Pacific hours (weekdays 5&ndash;11 AM PT). Claude Clock converts that
+            into your local timezone so you always know when the bonus window is live.
+          </p>
+        </section>
 
-            {/* Terminal CLI */}
-            <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-              <h3 className="text-xl font-semibold mb-2">Terminal CLI</h3>
-              <p className="text-gray-400 mb-4">
-                Quick check from your terminal. Works on macOS, Linux, and Windows.
+        {/* ── Three product modes ── */}
+        <section className="mb-16">
+          <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider text-center mb-6">
+            Choose your format
+          </h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Web clock */}
+            <Link
+              href="/clock"
+              className="group rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-600 p-5 transition-colors"
+            >
+              <div className="text-2xl mb-3">&#127760;</div>
+              <h3 className="font-semibold mb-1 group-hover:text-yellow-400 transition-colors">
+                Web clock
+              </h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Instant browser-based countdown. No install, no friction.
               </p>
-              <code className="block rounded-lg bg-gray-800 text-green-400 px-4 py-3 font-mono text-sm">
-                npm install -g claudeclock
+            </Link>
+
+            {/* Mac app */}
+            <a
+              href="/downloads/ClaudeClock.dmg"
+              className="group rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-600 p-5 transition-colors"
+            >
+              <div className="text-2xl mb-3">&#128187;</div>
+              <h3 className="font-semibold mb-1 group-hover:text-yellow-400 transition-colors">
+                Mac app
+              </h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Lives in your menu bar. Glanceable 2&times; status all day.
+              </p>
+            </a>
+
+            {/* CLI */}
+            <div className="group rounded-xl border border-gray-800 bg-gray-900/60 p-5">
+              <div className="text-2xl mb-3">&#9000;</div>
+              <h3 className="font-semibold mb-1">CLI</h3>
+              <p className="text-sm text-gray-400 leading-relaxed mb-3">
+                Fast checks from terminal. Live dashboard or JSON output.
+              </p>
+              <code className="block rounded-lg bg-gray-800 text-green-400 px-3 py-2 font-mono text-xs">
+                npm i -g claudeclock
               </code>
             </div>
           </div>
         </section>
 
-        {/* Live clock link */}
-        <section className="mb-16 text-center">
-          <Link
-            href="/clock"
-            className="inline-flex items-center gap-2 text-xl text-yellow-400 hover:text-yellow-300 transition-colors font-semibold"
-          >
-            View live web clock <span aria-hidden="true">&rarr;</span>
-          </Link>
+        {/* ── FAQ-style trust answers ── */}
+        <section className="mb-16">
+          <div className="grid md:grid-cols-2 gap-x-8 gap-y-5 text-sm max-w-2xl mx-auto">
+            <div>
+              <h3 className="font-medium text-gray-300 mb-1">Is this official?</h3>
+              <p className="text-gray-500">
+                Unofficial. The promo is real &mdash; this tool just converts the times for your timezone.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-300 mb-1">Does it track my Claude account?</h3>
+              <p className="text-gray-500">
+                No. It&apos;s pure timezone logic. No login, no account access, no data collection.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-300 mb-1">Does it work outside NZ?</h3>
+              <p className="text-gray-500">
+                Yes. It detects your timezone automatically. APAC users benefit most, but it works anywhere.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-300 mb-1">How long is the promo?</h3>
+              <p className="text-gray-500">
+                March 13&ndash;28, 2026. Free, Pro, Max, and Team plans. Not Enterprise.
+              </p>
+            </div>
+          </div>
         </section>
 
-        {/* Footer */}
-        <footer className="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+        {/* ── Footer ── */}
+        <footer className="border-t border-gray-800 pt-6 flex flex-wrap justify-center gap-4 text-xs text-gray-500">
           <a
             href="https://support.claude.com/en/articles/14063676-claude-march-2026-usage-promotion"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-gray-300 transition-colors"
           >
-            Official Anthropic promo details &rarr;
+            View current promo
+          </a>
+          <span className="text-gray-700">&middot;</span>
+          <a
+            href="https://github.com/claudeclock/claudeclock"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-gray-300 transition-colors"
+          >
+            GitHub
           </a>
         </footer>
       </div>

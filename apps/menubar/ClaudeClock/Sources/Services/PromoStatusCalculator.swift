@@ -4,7 +4,6 @@ enum PromoStatusCalculator {
 
     // MARK: - Public API
 
-    /// Find the first promo whose date range contains `now`.
     static func getActivePromo(config: PromoConfig, now: Date = Date()) -> Promo? {
         let ts = now.timeIntervalSince1970
         let iso = ISO8601DateFormatter()
@@ -24,7 +23,6 @@ enum PromoStatusCalculator {
         return nil
     }
 
-    /// Get full promo status for the given config and time.
     static func getPromoStatus(config: PromoConfig, now: Date = Date()) -> PromoStatus {
         guard let promo = getActivePromo(config: config, now: now) else {
             return .inactive
@@ -40,7 +38,7 @@ enum PromoStatusCalculator {
 
         let comps = cal.dateComponents([.year, .month, .day, .hour, .minute, .weekday], from: now)
         let currentMinutesInDay = (comps.hour ?? 0) * 60 + (comps.minute ?? 0)
-        let weekday = comps.weekday ?? 1 // 1=Sun, 7=Sat
+        let weekday = comps.weekday ?? 1
 
         let peakStart = parseTime(peak.start)
         let peakEnd = parseTime(peak.end)
@@ -63,25 +61,23 @@ enum PromoStatusCalculator {
         var nextBonusStart: Date?
 
         if bonusActive {
-            // Find next peak start
             if peak.weekdaysOnly {
                 var daysUntilNextPeak = 0
                 if isDuringWeekday && currentMinutesInDay < peakStartMinutes {
                     daysUntilNextPeak = 0
                 } else if isDuringWeekday && currentMinutesInDay >= peakEndMinutes {
                     daysUntilNextPeak = 1
-                    var nextDay = nextWeekday(weekday)
+                    var nextDay = nextWeekdayVal(weekday)
                     while !isWeekday(nextDay) {
                         daysUntilNextPeak += 1
-                        nextDay = nextWeekdayFrom(nextDay)
+                        nextDay = nextWeekdayVal(nextDay)
                     }
                 } else {
-                    // Weekend
                     daysUntilNextPeak = 1
-                    var nextDay = nextWeekday(weekday)
+                    var nextDay = nextWeekdayVal(weekday)
                     while !isWeekday(nextDay) {
                         daysUntilNextPeak += 1
-                        nextDay = nextWeekdayFrom(nextDay)
+                        nextDay = nextWeekdayVal(nextDay)
                     }
                 }
 
@@ -108,7 +104,6 @@ enum PromoStatusCalculator {
                 windowEnd = effectiveEnd
             }
         } else {
-            // Peak active - find when bonus starts (peak end today)
             let peakEndDate = dateInTimezone(
                 cal: cal, baseDate: now,
                 daysOffset: 0,
@@ -123,7 +118,6 @@ enum PromoStatusCalculator {
         if bonusActive && minutesRemaining > 0 {
             let totalWindowMinutes: Int
             if peak.weekdaysOnly && !isDuringWeekday {
-                _ = peakEndMinutes - peakStartMinutes // peak duration (unused directly)
                 totalWindowMinutes = (24 * 60 - peakEndMinutes) + (2 * 24 * 60) + peakStartMinutes
             } else {
                 totalWindowMinutes = (24 * 60) - (peakEndMinutes - peakStartMinutes)
@@ -132,6 +126,15 @@ enum PromoStatusCalculator {
                 bonusProgress = min(1.0, 1.0 - Double(minutesRemaining) / Double(totalWindowMinutes))
             }
         }
+
+        // Calculate next window (for planning - even when bonus is active)
+        let (nextWinStart, nextWinEnd) = calculateNextWindow(
+            cal: cal, now: now, weekday: weekday,
+            currentMinutesInDay: currentMinutesInDay,
+            peakStartMinutes: peakStartMinutes, peakEndMinutes: peakEndMinutes,
+            peakStart: peakStart, peakEnd: peakEnd,
+            weekdaysOnly: peak.weekdaysOnly, bonusActive: bonusActive
+        )
 
         return PromoStatus(
             hasActivePromo: true,
@@ -143,24 +146,142 @@ enum PromoStatusCalculator {
             windowEnd: windowEnd,
             nextBonusStart: nextBonusStart,
             promoEndDate: promoEndDate,
-            bonusProgress: bonusProgress
+            bonusProgress: bonusProgress,
+            nextWindowStart: nextWinStart,
+            nextWindowEnd: nextWinEnd
         )
     }
 
-    /// Format a duration in minutes as "Xh Ym".
+    // MARK: - Formatting
+
     static func formatDuration(_ totalMinutes: Int) -> String {
         if totalMinutes <= 0 { return "0m" }
         let hours = totalMinutes / 60
         let minutes = totalMinutes % 60
         if hours == 0 { return "\(minutes)m" }
+        if minutes == 0 { return "\(hours)h" }
         return "\(hours)h \(minutes)m"
     }
 
-    /// Format a date as local time string.
     static func formatLocalTime(_ date: Date) -> String {
         let fmt = DateFormatter()
         fmt.dateFormat = "h:mm a zzz"
         return fmt.string(from: date)
+    }
+
+    static func formatTimeOnly(_ date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "h:mm a"
+        return fmt.string(from: date)
+    }
+
+    static func formatRelativeDay(_ date: Date) -> String {
+        let cal = Calendar.current
+        if cal.isDateInToday(date) {
+            return "Today"
+        } else if cal.isDateInTomorrow(date) {
+            return "Tomorrow"
+        } else {
+            let fmt = DateFormatter()
+            fmt.dateFormat = "EEEE" // "Monday", "Tuesday", etc.
+            return fmt.string(from: date)
+        }
+    }
+
+    static func formatSyncAge(_ date: Date) -> String {
+        let seconds = Int(-date.timeIntervalSinceNow)
+        if seconds < 5 { return "just now" }
+        if seconds < 60 { return "\(seconds)s ago" }
+        let minutes = seconds / 60
+        if minutes < 60 { return "\(minutes)m ago" }
+        let hours = minutes / 60
+        return "\(hours)h ago"
+    }
+
+    // MARK: - Next window calculation
+
+    private static func calculateNextWindow(
+        cal: Calendar, now: Date, weekday: Int,
+        currentMinutesInDay: Int,
+        peakStartMinutes: Int, peakEndMinutes: Int,
+        peakStart: (hours: Int, minutes: Int),
+        peakEnd: (hours: Int, minutes: Int),
+        weekdaysOnly: Bool, bonusActive: Bool
+    ) -> (start: Date?, end: Date?) {
+        if bonusActive {
+            // Currently in bonus. Next window = after the upcoming peak ends.
+            // First find when next peak starts
+            var daysToNextPeak = 0
+            let isDuringWd = isWeekday(weekday)
+            if weekdaysOnly {
+                if isDuringWd && currentMinutesInDay < peakStartMinutes {
+                    // Peak is later today, next bonus is after that peak
+                    daysToNextPeak = 0
+                } else {
+                    // Peak is tomorrow or next weekday
+                    daysToNextPeak = 1
+                    var nd = nextWeekdayVal(weekday)
+                    while weekdaysOnly && !isWeekday(nd) {
+                        daysToNextPeak += 1
+                        nd = nextWeekdayVal(nd)
+                    }
+                }
+            } else {
+                daysToNextPeak = currentMinutesInDay >= peakEndMinutes ? 1 : 0
+            }
+
+            // Next bonus starts when that peak ends
+            let nextBonusStartDate = dateInTimezone(
+                cal: cal, baseDate: now,
+                daysOffset: daysToNextPeak,
+                hours: peakEnd.hours, minutes: peakEnd.minutes
+            )
+
+            // Next bonus ends when the following peak starts
+            var daysToFollowingPeak = daysToNextPeak + 1
+            if weekdaysOnly {
+                var nd = nextWeekdayVal(weekday)
+                // Advance to the weekday after the next peak
+                for _ in 0..<daysToNextPeak { nd = nextWeekdayVal(nd) }
+                if !isWeekday(nd) {
+                    while !isWeekday(nd) {
+                        daysToFollowingPeak += 1
+                        nd = nextWeekdayVal(nd)
+                    }
+                }
+            }
+            let nextBonusEndDate = dateInTimezone(
+                cal: cal, baseDate: now,
+                daysOffset: daysToFollowingPeak,
+                hours: peakStart.hours, minutes: peakStart.minutes
+            )
+
+            return (nextBonusStartDate, nextBonusEndDate)
+        } else {
+            // Currently in peak. Next bonus starts when peak ends (today).
+            // That window ends when next peak starts.
+            let bonusStartDate = dateInTimezone(
+                cal: cal, baseDate: now,
+                daysOffset: 0,
+                hours: peakEnd.hours, minutes: peakEnd.minutes
+            )
+
+            var daysToNextPeak = 1
+            if weekdaysOnly {
+                var nd = nextWeekdayVal(weekday)
+                while !isWeekday(nd) {
+                    daysToNextPeak += 1
+                    nd = nextWeekdayVal(nd)
+                }
+            }
+            let bonusEndDate = dateInTimezone(
+                cal: cal, baseDate: now,
+                daysOffset: daysToNextPeak,
+                hours: peakStart.hours, minutes: peakStart.minutes
+            )
+
+            return (bonusStartDate, bonusEndDate)
+        }
     }
 
     // MARK: - Private helpers
@@ -170,22 +291,14 @@ enum PromoStatusCalculator {
         return (hours: parts.count > 0 ? parts[0] : 0, minutes: parts.count > 1 ? parts[1] : 0)
     }
 
-    /// Calendar weekday: 1=Sun .. 7=Sat.  isWeekday = Mon-Fri = 2..6
     private static func isWeekday(_ calWeekday: Int) -> Bool {
         return calWeekday >= 2 && calWeekday <= 6
     }
 
-    /// Move one day forward in Calendar weekday space (1-7 wrapping).
-    private static func nextWeekday(_ wd: Int) -> Int {
+    private static func nextWeekdayVal(_ wd: Int) -> Int {
         return wd == 7 ? 1 : wd + 1
     }
 
-    private static func nextWeekdayFrom(_ wd: Int) -> Int {
-        return nextWeekday(wd)
-    }
-
-    /// Build a Date by taking baseDate's year/month/day in `cal`'s timezone,
-    /// adding `daysOffset`, and setting hours/minutes.
     private static func dateInTimezone(
         cal: Calendar, baseDate: Date,
         daysOffset: Int, hours: Int, minutes: Int

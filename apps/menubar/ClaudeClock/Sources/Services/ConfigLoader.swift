@@ -3,6 +3,8 @@ import Combine
 
 class ConfigLoader: ObservableObject {
     @Published var config: PromoConfig?
+    @Published var lastSyncDate: Date?
+    @Published var syncFailed: Bool = false
 
     private var refreshTimer: Timer?
     private let configURL = URL(string: "https://claudeclock.com/api/promo")!
@@ -17,29 +19,31 @@ class ConfigLoader: ObservableObject {
         refreshTimer?.invalidate()
     }
 
-    // MARK: - Remote fetch
-
     func fetchRemoteConfig() {
         let request = URLRequest(url: configURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-            guard let data = data, error == nil else { return }
-            if let decoded = try? JSONDecoder().decode(PromoConfig.self, from: data) {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                guard let data = data, error == nil else {
+                    self?.syncFailed = true
+                    return
+                }
+                if let decoded = try? JSONDecoder().decode(PromoConfig.self, from: data) {
                     self?.config = decoded
+                    self?.lastSyncDate = Date()
+                    self?.syncFailed = false
+                } else {
+                    self?.syncFailed = true
                 }
             }
         }.resume()
     }
 
-    // MARK: - Periodic refresh
-
     private func startPeriodicRefresh() {
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in
+        // Check once per 24 hours — the promo config rarely changes
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 86400, repeats: true) { [weak self] _ in
             self?.fetchRemoteConfig()
         }
     }
-
-    // MARK: - Fallback config
 
     private func loadFallbackConfig() {
         let json = """
@@ -68,6 +72,7 @@ class ConfigLoader: ObservableObject {
         if let data = json.data(using: .utf8),
            let decoded = try? JSONDecoder().decode(PromoConfig.self, from: data) {
             self.config = decoded
+            self.lastSyncDate = Date()
         }
     }
 }
