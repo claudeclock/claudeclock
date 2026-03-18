@@ -46,7 +46,7 @@ export function WatchDashboard({ config, notify }: WatchDashboardProps) {
 
   if (!status.hasActivePromo) {
     return (
-      <Box borderStyle="double" flexDirection="column" paddingX={2} paddingY={1}>
+      <Box borderStyle="round" flexDirection="column" paddingX={2} paddingY={1}>
         <Text bold>{'\u26A1'} CLAUDE CLOCK</Text>
         <Text> </Text>
         <Text dimColor>No active promotion</Text>
@@ -56,7 +56,7 @@ export function WatchDashboard({ config, notify }: WatchDashboardProps) {
   }
 
   return (
-    <Box borderStyle="double" flexDirection="column" paddingX={2} paddingY={1}>
+    <Box borderStyle="round" flexDirection="column" paddingX={2} paddingY={1}>
       <Text bold>{'\u26A1'} CLAUDE CLOCK</Text>
       <Text> </Text>
 
