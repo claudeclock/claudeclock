@@ -32,9 +32,20 @@ function usePromoStatus() {
 
   useEffect(() => {
     fetch('/api/promo')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('fetch failed');
+        return res.json();
+      })
       .then((data: PromoConfig) => setConfig(data))
-      .catch(() => {});
+      .catch(() => {
+        // Fallback: retry from same endpoint after short delay
+        setTimeout(() => {
+          fetch('/api/promo')
+            .then(res => res.ok ? res.json() : null)
+            .then((data) => { if (data) setConfig(data as PromoConfig); })
+            .catch(() => {});
+        }, 3000);
+      });
   }, []);
 
   const tick = useCallback(() => {

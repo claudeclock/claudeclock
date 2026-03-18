@@ -15,7 +15,6 @@ const cli = meow(
   Options
     --watch, -w   Live dashboard mode
     --json        Machine-readable JSON output
-    --plan        Set your Claude plan
     --notify      Enable system notifications (watch mode)
 
   Examples
@@ -34,9 +33,6 @@ const cli = meow(
       json: {
         type: 'boolean',
         default: false,
-      },
-      plan: {
-        type: 'string',
       },
       notify: {
         type: 'boolean',

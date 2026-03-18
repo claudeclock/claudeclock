@@ -324,7 +324,6 @@ function calculateBonusWindowDuration(
     // Weekend: bonus runs from Friday peak-end through Sunday midnight to Monday peak-start
     // Friday: (24*60 - peakEndMinutes) + Saturday: 24*60 + Sunday: 24*60 + Monday: peakStartMinutes
     // But depends on which day we're on — simplify
-    const peakDuration = peakEndMinutes - peakStartMinutes;
     // Fri after peak + Sat + Sun + Mon before peak
     return (24 * 60 - peakEndMinutes) + (2 * 24 * 60) + peakStartMinutes;
   }

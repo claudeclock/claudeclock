@@ -101,7 +101,7 @@ export default function Home() {
                 <div className="border-t border-gray-800 bg-gray-900/60 px-5 py-3">
                   <div className="inline-flex items-center gap-3 rounded-lg bg-gray-950 border border-gray-800 px-3 py-2">
                     <span className="text-sm text-yellow-400">&#9889;</span>
-                    <span className="text-sm font-semibold">2X</span>
+                    <span className="text-sm font-semibold">2&times;</span>
                     <span className="text-sm text-gray-400">4h 52m</span>
                   </div>
                 </div>
