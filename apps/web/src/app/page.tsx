@@ -109,20 +109,27 @@ export default function Home() {
             </a>
 
             {/* CLI */}
-            <div className="rounded-xl border border-gray-800 bg-gray-900/40 overflow-hidden h-full">
-              <div className="p-5">
-                <h3 className="font-semibold mb-1">Terminal CLI</h3>
-                <p className="text-sm text-gray-500">
-                  Quick checks. Live dashboard. JSON output.
-                </p>
-              </div>
-              <div className="border-t border-gray-800 bg-gray-900/60 px-5 py-3">
-                <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 font-mono text-[11px]">
-                  <p className="text-gray-600">$ claudeclock</p>
-                  <p className="text-green-400 mt-0.5">&#9889; 2&times; active &mdash; 4h 52m</p>
+            <a
+              href="https://www.npmjs.com/package/claudeclock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block"
+            >
+              <div className="rounded-xl border border-gray-800 hover:border-gray-600 bg-gray-900/40 overflow-hidden transition-colors h-full">
+                <div className="p-5">
+                  <h3 className="font-semibold group-hover:text-yellow-400 transition-colors mb-1">Terminal CLI</h3>
+                  <p className="text-sm text-gray-500">
+                    Quick checks. Live dashboard. JSON output.
+                  </p>
+                </div>
+                <div className="border-t border-gray-800 bg-gray-900/60 px-5 py-3">
+                  <div className="rounded-lg bg-gray-950 border border-gray-800 p-3 font-mono text-[11px]">
+                    <p className="text-gray-600">$ npm i -g claudeclock</p>
+                    <p className="text-green-400 mt-0.5">&#9889; 2&times; active &mdash; 4h 52m</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
         </section>
 

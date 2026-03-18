@@ -29,6 +29,7 @@ function getRelativeDay(date: Date): string {
 function usePromoStatus() {
   const [config, setConfig] = useState<PromoConfig | null>(null);
   const [status, setStatus] = useState<PromoStatus | null>(null);
+  const [fetchFailed, setFetchFailed] = useState(false);
 
   useEffect(() => {
     fetch('/api/promo')
@@ -38,12 +39,15 @@ function usePromoStatus() {
       })
       .then((data: PromoConfig) => setConfig(data))
       .catch(() => {
-        // Fallback: retry from same endpoint after short delay
+        // Retry once after 3 seconds
         setTimeout(() => {
           fetch('/api/promo')
             .then(res => res.ok ? res.json() : null)
-            .then((data) => { if (data) setConfig(data as PromoConfig); })
-            .catch(() => {});
+            .then((data) => {
+              if (data) setConfig(data as PromoConfig);
+              else setFetchFailed(true);
+            })
+            .catch(() => setFetchFailed(true));
         }, 3000);
       });
   }, []);
@@ -59,13 +63,13 @@ function usePromoStatus() {
     return () => clearInterval(interval);
   }, [config, tick]);
 
-  return status;
+  return { status, fetchFailed };
 }
 
 // ─── Hero inline status (for homepage) ───
 
 export function HeroStatus() {
-  const status = usePromoStatus();
+  const { status } = usePromoStatus();
 
   if (!status || !status.hasActivePromo) {
     return <div className="h-12" />;
@@ -113,7 +117,7 @@ export function HeroStatus() {
 }
 
 export function HeroBadge() {
-  const status = usePromoStatus();
+  const { status } = usePromoStatus();
 
   if (!status || !status.hasActivePromo) return null;
 
@@ -137,7 +141,7 @@ export function HeroBadge() {
 // ─── Full clock card (for /clock page) ───
 
 export default function LiveClock() {
-  const status = usePromoStatus();
+  const { status, fetchFailed } = usePromoStatus();
   const tzAbbrev = typeof window !== 'undefined'
     ? new Date().toLocaleTimeString('en-US', { timeZoneName: 'short' }).split(' ').pop()
     : '';
@@ -151,6 +155,20 @@ export default function LiveClock() {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  if (fetchFailed) {
+    return (
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/80 backdrop-blur p-8 text-center w-full max-w-md">
+        <p className="text-gray-400 mb-2">Unable to load promo data</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (!status || !status.hasActivePromo) {
     return (
