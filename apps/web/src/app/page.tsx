@@ -15,42 +15,49 @@ export default function Home() {
           <p className="mt-4 text-lg text-gray-300 max-w-xl mx-auto">
             See exactly when Claude&apos;s 2&times; bonus window is live in your timezone.
           </p>
-          <div className="mt-3">
-            <HeroMessage />
-          </div>
+          {/* Status panel: timezone left, live status center, CTAs right */}
+          <div className="mt-10 rounded-2xl border border-gray-800 bg-gray-900/60 backdrop-blur px-6 py-5">
+            {/* Top row: timezone + live status */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+              <div className="text-left">
+                <HeroMessage />
+              </div>
+              <div className="md:text-right">
+                <LiveClock inline />
+              </div>
+            </div>
 
-          {/* Live status inline */}
-          <div className="mt-8">
-            <LiveClock inline />
+            {/* Divider */}
+            <div className="border-t border-gray-800 pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-xs text-gray-500">
+                  No account needed. No conversion math.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href="/clock"
+                    className="rounded-lg bg-yellow-400 text-gray-950 font-semibold px-4 py-2 text-xs hover:bg-yellow-300 transition-colors"
+                  >
+                    Open live clock
+                  </Link>
+                  <a
+                    href="/downloads/ClaudeClock.dmg"
+                    className="rounded-lg border border-gray-700 text-gray-300 font-medium px-4 py-2 text-xs hover:border-gray-500 hover:text-white transition-colors"
+                  >
+                    Mac app
+                  </a>
+                  <a
+                    href="https://www.npmjs.com/package/claudeclock"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border border-gray-700 text-gray-300 font-medium px-4 py-2 text-xs hover:border-gray-500 hover:text-white transition-colors"
+                  >
+                    <code className="font-mono">npm i -g claudeclock</code>
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-
-          {/* CTA cluster */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/clock"
-              className="rounded-lg bg-yellow-400 text-gray-950 font-semibold px-5 py-2.5 text-sm hover:bg-yellow-300 transition-colors"
-            >
-              Open live clock
-            </Link>
-            <a
-              href="/downloads/ClaudeClock.dmg"
-              className="rounded-lg border border-gray-700 text-gray-200 font-semibold px-5 py-2.5 text-sm hover:border-gray-500 hover:text-white transition-colors"
-            >
-              Download Mac app
-            </a>
-            <a
-              href="https://www.npmjs.com/package/claudeclock"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg border border-gray-700 text-gray-200 font-semibold px-5 py-2.5 text-sm hover:border-gray-500 hover:text-white transition-colors"
-            >
-              <code className="font-mono text-xs">npm i -g claudeclock</code>
-            </a>
-          </div>
-
-          <p className="mt-4 text-xs text-gray-500">
-            No account needed. Works in your local timezone. No conversion math.
-          </p>
         </section>
 
         {/* ── What is this ── */}
