@@ -25,7 +25,7 @@ SOURCES=(
 echo "Building ClaudeClock..."
 swiftc \
     -sdk "$SDK_PATH" \
-    -target x86_64-apple-macos13.0 \
+    -target x86_64-apple-macos12.0 \
     -parse-as-library \
     -O \
     -o "$BINARY" \

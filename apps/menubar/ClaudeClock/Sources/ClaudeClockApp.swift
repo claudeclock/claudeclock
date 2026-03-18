@@ -1,53 +1,80 @@
 import SwiftUI
-import Combine
+import AppKit
 
-@main
-struct ClaudeClockApp: App {
-    @StateObject private var viewModel = AppViewModel()
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var statusItem: NSStatusItem!
+    var popover: NSPopover!
+    var timer: Timer?
+    var configLoader = ConfigLoader()
+    var currentStatus = PromoStatus.inactive
 
-    var body: some Scene {
-        MenuBarExtra {
-            MenuBarDropdown(status: viewModel.status)
-        } label: {
-            Text(viewModel.menuBarTitle)
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Create status bar item
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+        // Create popover with SwiftUI content
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 280, height: 300)
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: MenuBarDropdown(status: currentStatus))
+
+        // Set up button
+        if let button = statusItem.button {
+            button.title = "\u{23F8} \u{2014}"
+            button.action = #selector(togglePopover)
+            button.target = self
         }
-    }
-}
 
-class AppViewModel: ObservableObject {
-    @Published var status = PromoStatus.inactive
-
-    private let configLoader = ConfigLoader()
-    private var cancellables = Set<AnyCancellable>()
-    private var tickTimer: Timer?
-
-    init() {
-        // React to config changes
-        configLoader.$config
-            .receive(on: RunLoop.main)
-            .sink { [weak self] _ in self?.updateStatus() }
-            .store(in: &cancellables)
-
-        // Tick every second
-        tickTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        // Update every second
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.updateStatus()
         }
     }
 
-    deinit {
-        tickTimer?.invalidate()
+    func applicationWillTerminate(_ notification: Notification) {
+        timer?.invalidate()
+    }
+
+    func updateStatus() {
+        guard let config = configLoader.config else { return }
+        currentStatus = PromoStatusCalculator.getPromoStatus(config: config)
+
+        // Update menu bar title
+        if let button = statusItem.button {
+            button.title = menuBarTitle
+        }
+
+        // Update popover content
+        popover.contentViewController = NSHostingController(
+            rootView: MenuBarDropdown(status: currentStatus)
+        )
     }
 
     var menuBarTitle: String {
-        if !status.hasActivePromo { return "\u{23F8} \u{2014}" }
-        if status.bonusActive {
-            return "\u{26A1}\(status.multiplier)X \(PromoStatusCalculator.formatDuration(status.minutesRemaining))"
+        if !currentStatus.hasActivePromo { return "\u{23F8} \u{2014}" }
+        if currentStatus.bonusActive {
+            return "\u{26A1}\(currentStatus.multiplier)X \(PromoStatusCalculator.formatDuration(currentStatus.minutesRemaining))"
         }
-        return "\u{1F4A4}1X \(PromoStatusCalculator.formatDuration(status.minutesUntilBonus))\u{2192}\u{26A1}"
+        return "\u{1F4A4}1X \(PromoStatusCalculator.formatDuration(currentStatus.minutesUntilBonus))\u{2192}\u{26A1}"
     }
 
-    private func updateStatus() {
-        guard let config = configLoader.config else { return }
-        status = PromoStatusCalculator.getPromoStatus(config: config)
+    @objc func togglePopover() {
+        guard let button = statusItem.button else { return }
+        if popover.isShown {
+            popover.performClose(nil)
+        } else {
+            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        }
+    }
+}
+
+@main
+struct ClaudeClockApp {
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+        app.setActivationPolicy(.accessory) // No dock icon
+        app.run()
     }
 }
