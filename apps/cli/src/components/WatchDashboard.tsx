@@ -23,12 +23,11 @@ export function WatchDashboard({ config, notify }: WatchDashboardProps) {
     return () => clearInterval(timer);
   }, [config]);
 
-  // Notification on bonus state change
   useEffect(() => {
     if (!notify) return;
     if (prevBonusActive.current !== status.bonusActive) {
       if (status.bonusActive) {
-        sendNotification('Claude Clock', 'Bonus window is now ACTIVE!');
+        sendNotification('Claude Clock', '2\u00D7 bonus window is now active!');
       } else {
         sendNotification('Claude Clock', 'Bonus window ended.');
       }
@@ -48,39 +47,40 @@ export function WatchDashboard({ config, notify }: WatchDashboardProps) {
   if (!status.hasActivePromo) {
     return (
       <Box borderStyle="double" flexDirection="column" paddingX={2} paddingY={1}>
-        <Text bold>&#x26A1; CLAUDE CLOCK &#x26A1;</Text>
+        <Text bold>{'\u26A1'} CLAUDE CLOCK</Text>
+        <Text> </Text>
         <Text dimColor>No active promotion</Text>
-        <Text dimColor>q to quit &#xB7; claudeclock.com</Text>
+        <Text dimColor>q to quit {'\u00B7'} claudeclock.com</Text>
       </Box>
     );
   }
 
   return (
     <Box borderStyle="double" flexDirection="column" paddingX={2} paddingY={1}>
-      <Text bold>&#x26A1; CLAUDE CLOCK &#x26A1;</Text>
+      <Text bold>{'\u26A1'} CLAUDE CLOCK</Text>
       <Text> </Text>
 
       {status.bonusActive ? (
         <>
-          <Text color="green" bold>{status.multiplier}X BONUS ACTIVE</Text>
+          <Text color="green" bold>{status.multiplier}{'\u00D7'} BONUS ACTIVE</Text>
           <Text> </Text>
           <ProgressBar progress={status.bonusProgress} />
           <Text> </Text>
           {status.windowEndLocal && (
             <>
-              <Text>Bonus ends: <Text bold>{formatLocalTime(status.windowEndLocal)}</Text></Text>
-              <Text>Time left:  <Text bold>{formatDuration(status.minutesRemaining)}</Text></Text>
+              <Text>Ends:      <Text bold>{formatLocalTime(status.windowEndLocal)}</Text></Text>
+              <Text>Remaining: <Text bold>{formatDuration(status.minutesRemaining)}</Text></Text>
             </>
           )}
         </>
       ) : (
         <>
-          <Text color="yellow" bold>STANDARD (1X)</Text>
+          <Text color="yellow" bold>{'\uD83D\uDE34'} PEAK HOURS (1{'\u00D7'})</Text>
           <Text> </Text>
           {status.nextBonusStartLocal && (
             <>
-              <Text>Bonus in:   <Text bold>{formatDuration(status.minutesUntilBonus)}</Text></Text>
-              <Text>Resumes at: <Text bold>{formatLocalTime(status.nextBonusStartLocal)}</Text></Text>
+              <Text>{status.multiplier}{'\u00D7'} in:     <Text bold>{formatDuration(status.minutesUntilBonus)}</Text></Text>
+              <Text>Resumes: <Text bold>{formatLocalTime(status.nextBonusStartLocal)}</Text></Text>
             </>
           )}
         </>
@@ -88,9 +88,9 @@ export function WatchDashboard({ config, notify }: WatchDashboardProps) {
 
       <Text> </Text>
       {status.promo && (
-        <Text dimColor>{status.promo.name} &mdash; ends {status.promoEndDate?.toLocaleDateString()}</Text>
+        <Text dimColor>{status.promo.name} {'\u2014'} ends {status.promoEndDate?.toLocaleDateString()}</Text>
       )}
-      <Text dimColor>q to quit &#xB7; claudeclock.com</Text>
+      <Text dimColor>q to quit {'\u00B7'} claudeclock.com</Text>
     </Box>
   );
 }

@@ -11,7 +11,7 @@ export function QuickStatus({ status }: QuickStatusProps) {
   if (!status.hasActivePromo) {
     return (
       <Box flexDirection="column">
-        <Text>&#x23F8; No active Claude promotion</Text>
+        <Text>{'\u23F8'} No active Claude promotion</Text>
         <Text dimColor>Check claudeclock.com for updates</Text>
       </Box>
     );
@@ -21,10 +21,10 @@ export function QuickStatus({ status }: QuickStatusProps) {
     return (
       <Box flexDirection="column">
         <Text color="green" bold>
-          &#x26A1; BONUS ACTIVE &mdash; {status.multiplier}x usage for {formatDuration(status.minutesRemaining)}
+          {'\u26A1'} {status.multiplier}{'\u00D7'} ACTIVE {'\u2014'} {formatDuration(status.minutesRemaining)} remaining
         </Text>
         {status.windowEndLocal && (
-          <Text dimColor>Bonus ends at {formatLocalTime(status.windowEndLocal)}</Text>
+          <Text dimColor>Ends at {formatLocalTime(status.windowEndLocal)}</Text>
         )}
         {status.promoEndDate && (
           <Text dimColor>Promo ends {status.promoEndDate.toLocaleDateString()}</Text>
@@ -33,11 +33,10 @@ export function QuickStatus({ status }: QuickStatusProps) {
     );
   }
 
-  // Peak hours (standard rate), not bonus
   return (
     <Box flexDirection="column">
       <Text color="yellow">
-        &#x1F4A4; Standard rate &mdash; bonus resumes in {formatDuration(status.minutesUntilBonus)}
+        {'\uD83D\uDE34'} Peak hours {'\u2014'} {status.multiplier}{'\u00D7'} resumes in {formatDuration(status.minutesUntilBonus)}
       </Text>
       {status.nextBonusStartLocal && (
         <Text dimColor>Next bonus at {formatLocalTime(status.nextBonusStartLocal)}</Text>
