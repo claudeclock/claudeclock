@@ -267,7 +267,7 @@ export default function LiveClock() {
 
       {/* Actions below card */}
       <div className="mt-5 flex justify-center gap-4 text-sm">
-        <a href="/downloads/ClaudeClock.dmg" className="text-gray-500 hover:text-white transition-colors">
+        <a href="https://github.com/claudeclock/claudeclock/releases/latest/download/ClaudeClock.dmg" className="text-gray-500 hover:text-white transition-colors">
           Mac app
         </a>
         <span className="text-gray-800">&middot;</span>

@@ -38,7 +38,7 @@ export default function Home() {
                 Open live clock
               </Link>
               <a
-                href="/downloads/ClaudeClock.dmg"
+                href="https://github.com/claudeclock/claudeclock/releases/latest/download/ClaudeClock.dmg"
                 className="rounded-lg border border-gray-700 text-gray-300 font-medium px-4 py-2 text-sm hover:border-gray-500 hover:text-white transition-colors"
               >
                 Mac app
@@ -88,7 +88,7 @@ export default function Home() {
             </Link>
 
             {/* Mac app */}
-            <a href="/downloads/ClaudeClock.dmg" className="group block">
+            <a href="https://github.com/claudeclock/claudeclock/releases/latest/download/ClaudeClock.dmg" className="group block">
               <div className="rounded-xl border border-gray-800 hover:border-gray-600 bg-gray-900/40 overflow-hidden transition-colors h-full">
                 <div className="p-5">
                   <h3 className="font-semibold group-hover:text-yellow-400 transition-colors mb-1">
@@ -96,6 +96,9 @@ export default function Home() {
                   </h3>
                   <p className="text-sm text-gray-500">
                     Glanceable. Lives in your menu bar all day.
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    First launch: right-click &rarr; Open to allow
                   </p>
                 </div>
                 <div className="border-t border-gray-800 bg-gray-900/60 px-5 py-3">
