@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import promoConfig from '../../../../../../shared/promo-config.json';
+import promoConfig from '../../../data/promo-config.json';
 
 export async function GET() {
   return NextResponse.json(promoConfig, {

@@ -18,6 +18,7 @@ SOURCES=(
     "$SOURCES_DIR/Models/PromoStatus.swift"
     "$SOURCES_DIR/Services/PromoStatusCalculator.swift"
     "$SOURCES_DIR/Services/ConfigLoader.swift"
+    "$SOURCES_DIR/Services/NotificationManager.swift"
     "$SOURCES_DIR/Views/MenuBarDropdown.swift"
     "$SOURCES_DIR/ClaudeClockApp.swift"
 )

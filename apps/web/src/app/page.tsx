@@ -25,7 +25,7 @@ export default function Home() {
           </div>
 
           {/* Right: live status + CTAs */}
-          <div>
+          <div className="rounded-2xl border border-indigo-500/20 bg-indigo-950/30 p-6 shadow-lg shadow-indigo-500/5">
             <HeroBadge />
             <div className="mt-3 mb-6">
               <HeroStatus />
