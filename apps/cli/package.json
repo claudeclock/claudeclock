@@ -13,7 +13,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsx src/index.tsx",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/node-notifier": "^8.0.5",
-    "@types/react": "^18.3.18",
+    "@types/react": "^19.0.0",
     "ink-testing-library": "^4.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
