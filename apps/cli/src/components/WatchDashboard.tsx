@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text, useApp, useInput } from 'ink';
 import process from 'node:process';
 import type { PromoConfig, PromoStatus } from '../promo.js';
 import { getPromoStatus, formatDuration, formatLocalTime } from '../promo.js';
 import { ProgressBar } from './ProgressBar.js';
+import { sendNotification } from '../notify.js';
 
 interface WatchDashboardProps {
   config: PromoConfig;
+  notify: boolean;
 }
 
-export function WatchDashboard({ config }: WatchDashboardProps) {
+export function WatchDashboard({ config, notify }: WatchDashboardProps) {
   const { exit } = useApp();
   const [status, setStatus] = useState<PromoStatus>(() => getPromoStatus(config));
+  const prevBonusActive = useRef<boolean>(status.bonusActive);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -19,6 +22,19 @@ export function WatchDashboard({ config }: WatchDashboardProps) {
     }, 1000);
     return () => clearInterval(timer);
   }, [config]);
+
+  // Notification on bonus state change
+  useEffect(() => {
+    if (!notify) return;
+    if (prevBonusActive.current !== status.bonusActive) {
+      if (status.bonusActive) {
+        sendNotification('Claude Clock', 'Bonus window is now ACTIVE!');
+      } else {
+        sendNotification('Claude Clock', 'Bonus window ended.');
+      }
+    }
+    prevBonusActive.current = status.bonusActive;
+  }, [status.bonusActive, notify]);
 
   useInput(
     (input) => {

@@ -15,10 +15,12 @@ const cli = meow(
   Options
     --watch, -w   Live dashboard mode
     --json        Machine-readable JSON output
+    --plan        Set your Claude plan
+    --notify      Enable system notifications (watch mode)
 
   Examples
     $ claudeclock
-    $ claudeclock --watch
+    $ claudeclock --watch --notify
     $ claudeclock --json
 `,
   {
@@ -30,6 +32,13 @@ const cli = meow(
         default: false,
       },
       json: {
+        type: 'boolean',
+        default: false,
+      },
+      plan: {
+        type: 'string',
+      },
+      notify: {
         type: 'boolean',
         default: false,
       },
@@ -47,7 +56,7 @@ async function main() {
   }
 
   if (cli.flags.watch) {
-    render(<WatchDashboard config={config} />);
+    render(<WatchDashboard config={config} notify={cli.flags.notify} />);
     return;
   }
 
