@@ -92,6 +92,26 @@ cp -R "$APP_DIR" "$DMG_DIR/"
 # Create symlink to Applications folder
 ln -s /Applications "$DMG_DIR/Applications"
 
+# Add first-launch instructions
+cat > "$DMG_DIR/READ ME FIRST.txt" << 'INSTRUCTIONS'
+ClaudeClock — First Launch Instructions
+========================================
+
+1. Drag ClaudeClock to your Applications folder
+2. Open Applications and find ClaudeClock
+3. RIGHT-CLICK (or Control-click) on ClaudeClock
+4. Select "Open" from the menu
+5. Click "Open" in the dialog that appears
+
+This is only needed the first time. After that,
+ClaudeClock will open normally from your menu bar.
+
+Why? macOS requires this for apps downloaded outside
+the App Store. It's a one-time security step.
+
+Learn more: claudeclock.com
+INSTRUCTIONS
+
 # Create the DMG
 echo "Creating DMG..."
 hdiutil create \
