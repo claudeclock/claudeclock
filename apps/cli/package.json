@@ -1,5 +1,5 @@
 {
-  "name": "claudeclock",
+  "name": "@claudeclock/run",
   "version": "1.0.0",
   "description": "See when you're in the Claude 2x bonus window",
   "type": "module",
